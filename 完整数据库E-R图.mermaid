@@ -1,0 +1,68 @@
+erDiagram
+    %% 实体定义
+    USER
+    ROLE
+    PERMISSION
+    ROLE_PERMISSION
+    PRODUCT_CATEGORY
+    BRAND
+    PRODUCT
+    PRODUCT_DETAIL
+    PRODUCT_IMAGE
+    SYS_IMAGE
+    SECOND_HAND
+    PRODUCT_RENTAL_DETAIL
+    RENTAL_EQUIPMENT_STATUS
+    RENTAL_RULE
+    ORDERS
+    ORDER_ITEM
+    RENTAL
+    PAYMENT
+    CART
+    FAVORITE
+    EVALUATION
+    INVENTORY
+    INVENTORY_HISTORY
+    SKU
+    USER_ADDRESS
+    USER_MEMBER
+    SYS_NOTICE
+    SYS_LOG
+    STATISTICS
+
+    %% 关系定义
+    USER ||--o{ ROLE : has
+    ROLE ||--o{ ROLE_PERMISSION : has
+    PERMISSION ||--o{ ROLE_PERMISSION : has
+    USER ||--o{ PRODUCT : sells
+    USER ||--o{ ORDERS : places
+    USER ||--o{ CART : has
+    USER ||--o{ FAVORITE : has
+    USER ||--o{ EVALUATION : writes
+    USER ||--o{ USER_ADDRESS : has
+    USER ||--o{ USER_MEMBER : has
+    USER ||--o{ SYS_NOTICE : receives
+    USER ||--o{ SYS_IMAGE : uploads
+    USER ||--o{ SYS_LOG : generates
+    PRODUCT_CATEGORY ||--o{ PRODUCT : categorizes
+    BRAND ||--o{ PRODUCT : brands
+    PRODUCT ||--o{ PRODUCT_DETAIL : has
+    PRODUCT ||--o{ PRODUCT_IMAGE : has
+    PRODUCT ||--o{ SECOND_HAND : has
+    PRODUCT ||--o{ PRODUCT_RENTAL_DETAIL : has
+    PRODUCT ||--o{ RENTAL_EQUIPMENT_STATUS : has
+    PRODUCT ||--o{ INVENTORY : has
+    PRODUCT ||--o{ SKU : has
+    PRODUCT ||--o{ CART : added_to
+    PRODUCT ||--o{ FAVORITE : favorited
+    PRODUCT ||--o{ EVALUATION : evaluated
+    PRODUCT ||--o{ ORDER_ITEM : included_in
+    SYS_IMAGE ||--o{ PRODUCT_IMAGE : referenced_by
+    ORDERS ||--o{ ORDER_ITEM : contains
+    ORDERS ||--o{ RENTAL : has
+    ORDERS ||--o{ PAYMENT : has
+    ORDERS ||--o{ EVALUATION : has
+    INVENTORY ||--o{ INVENTORY_HISTORY : has
+    SKU ||--o{ INVENTORY : referenced_by
+    USER_ADDRESS ||--o{ ORDERS : used_in
+    RENTAL_RULE ||--o{ PRODUCT_RENTAL_DETAIL : follows

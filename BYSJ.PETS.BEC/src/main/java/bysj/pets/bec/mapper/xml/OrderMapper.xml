@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bysj.pets.bec.mapper.OrderMapper">
+
+    <!-- 查询用户订单列表（购买的订单） -->
+    <select id="selectUserOrders" resultType="bysj.pets.bec.entity.Orders">
+        SELECT * FROM `orders` WHERE user_id = #{userId} ORDER BY create_time DESC
+    </select>
+    
+    <!-- 查询商家订单列表（销售的订单） -->
+    <select id="selectSellerOrders" resultType="bysj.pets.bec.entity.Orders">
+        SELECT * FROM `orders` WHERE seller_id = #{sellerId} ORDER BY create_time DESC
+    </select>
+    
+    <!-- 查询用户订单列表（购买的订单），支持类型过滤 -->
+    <select id="selectUserOrdersByType" resultType="bysj.pets.bec.entity.Orders">
+        SELECT DISTINCT o.* 
+        FROM `orders` o
+        JOIN `order_item` oi ON o.order_id = oi.order_id
+        JOIN `product` p ON oi.product_id = p.product_id
+        WHERE o.user_id = #{userId}
+        <if test="type != null">
+            <choose>
+                <when test="type == 'new'">
+                    AND p.product_type = 1
+                </when>
+                <when test="type == 'used'">
+                    AND p.product_type = 2
+                </when>
+                <when test="type == 'rental'">
+                    AND p.product_type = 3
+                </when>
+            </choose>
+        </if>
+        ORDER BY o.create_time DESC
+    </select>
+    
+    <!-- 查询商家订单列表（销售的订单），支持类型过滤 -->
+    <select id="selectSellerOrdersByType" resultType="bysj.pets.bec.entity.Orders">
+        SELECT DISTINCT o.* 
+        FROM `orders` o
+        JOIN `order_item` oi ON o.order_id = oi.order_id
+        JOIN `product` p ON oi.product_id = p.product_id
+        WHERE o.seller_id = #{sellerId}
+        <if test="type != null">
+            <choose>
+                <when test="type == 'new'">
+                    AND p.product_type = 1
+                </when>
+                <when test="type == 'used'">
+                    AND p.product_type = 2
+                </when>
+                <when test="type == 'rental'">
+                    AND p.product_type = 3
+                </when>
+            </choose>
+        </if>
+        ORDER BY o.create_time DESC
+    </select>
+
+    <!-- 新增/修改订单插入语句，添加完整地址信息字段和seller_id -->
+    <insert id="insert" parameterType="bysj.pets.bec.entity.Orders" useGeneratedKeys="true" keyProperty="orderId" keyColumn="order_id">
+        INSERT INTO `orders` (
+        order_no, user_id, seller_id, address_id, recipient, phone, province, city, district, detail,
+        total_amount, shipping_fee, pay_amount,
+        order_status, payment_method, create_time, update_time
+        ) VALUES (
+        #{orderNo}, #{userId}, #{sellerId}, #{addressId}, #{recipient}, #{phone}, #{province}, #{city}, #{district}, #{detail},
+        #{totalAmount}, #{shippingFee}, #{payAmount},
+        #{orderStatus}, #{paymentMethod}, #{createTime}, #{updateTime}
+        )
+    </insert>
+
+</mapper>

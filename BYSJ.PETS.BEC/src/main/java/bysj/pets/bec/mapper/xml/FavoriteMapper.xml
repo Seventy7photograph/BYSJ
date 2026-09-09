@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bysj.pets.bec.mapper.FavoriteMapper">
+
+    <!-- 查询用户收藏列表 -->
+    <select id="selectUserFavorites" resultType="bysj.pets.bec.dto.FavoriteDTO">
+        SELECT
+            f.favorite_id AS id,
+            f.product_id AS productId,
+            p.model AS productName,
+            b.brand_name AS brandName,
+            pi.storage_path AS productImage,
+            p.price AS price,
+            p.stock AS stock,
+            p.product_type AS product_type,
+            p.`condition` AS `condition`,
+            pd.parameters AS specifications,
+            f.create_time AS createdAt
+        FROM favorite f
+        LEFT JOIN product p ON f.product_id = p.product_id
+        LEFT JOIN brand b ON p.brand = b.brand_id
+        LEFT JOIN product_image pri ON p.product_id = pri.product_id AND pri.image_type = 'main'
+        LEFT JOIN sys_image pi ON pri.image_id = pi.id
+        LEFT JOIN product_detail pd ON p.product_id = pd.product_id
+        WHERE f.user_id = #{userId}
+        ORDER BY f.create_time DESC
+    </select>
+
+    <!-- 检查商品是否已收藏 -->
+    <select id="checkProductIsFavorite" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM favorite
+        WHERE user_id = #{userId} AND product_id = #{productId}
+    </select>
+
+    <!-- 批量删除收藏 -->
+    <delete id="batchDeleteFavorites">
+        DELETE FROM favorite
+        WHERE user_id = #{userId} AND favorite_id IN
+        <foreach collection="favoriteIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 根据userId和productId删除收藏 -->
+    <delete id="removeFavoriteByProductId">
+        DELETE FROM favorite
+        WHERE user_id = #{userId} AND product_id = #{productId}
+    </delete>
+
+</mapper>

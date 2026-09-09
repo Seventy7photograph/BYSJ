@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bysj.pets.bec.mapper.ProductMapper">
+
+    <select id="selectGoodsList" resultType="bysj.pets.bec.entity.vo.GoodsVO">
+        SELECT
+    p.product_id,
+    p.brand ,<!-- 品牌ID -->
+    b.brand_name, <!-- 品牌名称 -->
+    CONCAT(b.brand_name, ' ', p.model) as name,
+    p.price,
+    p.original_price as originalPrice,
+    pc.category_name,
+    p.`condition`, <!-- 成色字段 -->
+    p.seller_id,
+    u.nickname as sellerName,
+    -- 押金：原价的10%
+    (p.original_price * 0.1) as deposit,
+    -- 起租天数：从数据库获取实际值
+    p.min_rental_days as minRentalDays
+        FROM product p
+        LEFT JOIN product_category pc ON p.category_id = pc.category_id
+        LEFT JOIN brand b ON p.brand= b.brand_id  <!-- 关联品牌表 -->
+        LEFT JOIN user u ON p.seller_id = u.user_id  <!-- 关联用户表获取卖家昵称 -->
+        WHERE 1=1
+        AND p.audit_status = 1  -- 审核通过
+        AND p.is_on_shelf = 1   -- 已上架
+
+        <!-- 商品类型筛选（租赁商品） -->
+        <if test="productType != null">
+            AND p.product_type = #{productType}
+        </if>
+        
+        <!-- 价格范围筛选 -->
+        <if test="priceRange != null and priceRange != ''">
+            <choose>
+                <when test='priceRange == "0-50"'>
+                    AND p.price BETWEEN 0 AND 50
+                </when>
+                <when test='priceRange == "50-100"'>
+                    AND p.price BETWEEN 50 AND 100
+                </when>
+                <when test='priceRange == "100-200"'>
+                    AND p.price BETWEEN 100 AND 200
+                </when>
+                <when test='priceRange == "200+"'>
+                    AND p.price > 200
+                </when>
+            </choose>
+        </if>
+
+        <!-- 分类筛选 -->
+        <if test="categoryCodes != null and categoryCodes.size() > 0">
+            AND pc.category_code IN
+            <foreach collection="categoryCodes" item="code" open="(" separator="," close=")">
+                #{code}
+            </foreach>
+        </if>
+
+        <!-- 品牌筛选 -->
+        <if test="brand != null and brand != ''">
+            AND p.brand = #{brand}
+        </if>
+
+        <!-- 类型筛选 -->
+        <if test="type != null and type != ''">
+            AND pc.category_code = #{type}
+        </if>
+
+        <!-- 关键词搜索 -->
+        <if test="keyword != null and keyword != ''">
+            AND (b.brand_name LIKE CONCAT('%', #{keyword}, '%')
+            OR p.model LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+
+        <!-- 质量筛选（全新） -->
+        <if test="quality != null and quality == 'brand_new'">
+            AND p.product_type = 1
+        </if>
+        <!-- 质量筛选（二手） -->
+        <if test="quality != null and quality == 'used'">
+            AND p.product_type = 2
+        </if>
+        <!-- 成色筛选 -->
+        <if test="condition != null and condition != ''">
+            AND p.`condition` = #{condition}
+        </if>
+
+        <!-- 排序方式 -->
+        <choose>
+            <when test="sort == 'price_asc'">
+                ORDER BY p.price ASC
+            </when>
+            <when test="sort == 'price_desc'">
+                ORDER BY p.price DESC
+            </when>
+            <otherwise>
+                ORDER BY RAND()  -- 随机排序
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectGoodsTotal" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM product p
+        LEFT JOIN product_category pc ON p.category_id = pc.category_id
+        LEFT JOIN brand b ON p.brand = b.brand_id
+        WHERE 1=1
+        AND p.audit_status = 1  -- 审核通过
+        AND p.is_on_shelf = 1   -- 已上架
+
+        <!-- 商品类型筛选（租赁商品） -->
+        <if test="productType != null">
+            AND p.product_type = #{productType}
+        </if>
+        
+        <!-- 价格范围筛选 -->
+        <if test="priceRange != null and priceRange != ''">
+            <choose>
+                <when test='priceRange == "0-50"'>
+                    AND p.price BETWEEN 0 AND 50
+                </when>
+                <when test='priceRange == "50-100"'>
+                    AND p.price BETWEEN 50 AND 100
+                </when>
+                <when test='priceRange == "100-200"'>
+                    AND p.price BETWEEN 100 AND 200
+                </when>
+                <when test='priceRange == "200+"'>
+                    AND p.price > 200
+                </when>
+            </choose>
+        </if>
+
+        <!-- 分类筛选 -->
+        <!-- 分类筛选：支持父分类+所有子分类 -->
+        <if test="categoryCodes != null and categoryCodes.size() > 0">
+            AND pc.category_code IN
+            <foreach collection="categoryCodes" item="code" open="(" separator="," close=")">
+                #{code}
+            </foreach>
+        </if>
+
+        <!-- 品牌筛选 -->
+        <if test="brand != null and brand != ''">
+            AND p.brand = #{brand}
+        </if>
+
+        <!-- 类型筛选 -->
+        <if test="type != null and type != ''">
+            AND pc.category_code = #{type}
+        </if>
+
+        <!-- 关键词搜索 -->
+        <if test="keyword != null and keyword != ''">
+            AND (b.brand_name LIKE CONCAT('%', #{keyword}, '%')
+            OR p.model LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+
+        <!-- 质量筛选（全新） -->
+        <if test="quality != null and quality == 'brand_new'">
+            AND p.product_type = 1
+        </if>
+        <!-- 质量筛选（二手） -->
+        <if test="quality != null and quality == 'used'">
+            AND p.product_type = 2
+        </if>
+        <!-- 成色筛选 -->
+        <if test="condition != null and condition != ''">
+            AND p.`condition` = #{condition}
+        </if>
+    </select>
+
+    <select id="selectById" parameterType="java.lang.Long" resultType="bysj.pets.bec.entity.Product">
+        SELECT
+            product_id, category_id, brand, model, product_type,
+            `condition`, original_price, price, stock, seller_id, audit_status, reject_reason,
+            is_on_shelf, create_time, update_time
+        FROM product
+        WHERE product_id = #{id}
+    </select>
+
+    <resultMap id="GoodsDetailVOMap" type="bysj.pets.bec.entity.vo.GoodsDetailVO">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="brandName" property="brandName"/>
+        <result column="categoryId" property="categoryId"/>
+        <result column="price" property="price"/>
+        <result column="originalPrice" property="originalPrice"/>
+        <result column="stock" property="stock"/>
+        <result column="imageUrl" property="imageUrl"/>
+        <!-- 修复：规格参数为JSON对象，映射为Map<String, String>类型 -->
+        <result column="specifications" property="specifications"
+                javaType="java.util.Map"
+                typeHandler="bysj.pets.bec.handler.CustomMapTypeHandler"/>
+        <!-- 图片URL数组保持不变 -->
+        <result column="imageUrls" property="imageUrls"
+                javaType="java.util.List"
+                typeHandler="bysj.pets.bec.handler.CustomJacksonTypeHandler"/>
+        <result column="description" property="description"/>
+        <result column="secondHandDescription" property="secondHandDescription"/>
+        <!-- 二手商品特有字段映射 -->
+        <result column="qualityReport" property="qualityReport"/>
+        <result column="usedTime" property="usedTime"/>
+        <result column="defectDesc" property="defectDesc"/>
+        <result column="defectImg" property="defectImg"
+                javaType="java.util.List"
+                typeHandler="bysj.pets.bec.handler.CustomJacksonTypeHandler"/>
+        <result column="sellerType" property="sellerType"/>
+        <result column="negotiateStatus" property="negotiateStatus"/>
+        <result column="finalPrice" property="finalPrice"/>
+        <result column="condition" property="condition"/>
+        <result column="sellerId" property="sellerId"/>
+        <result column="sellerName" property="sellerName"/>
+        <!-- 新增字段映射 -->
+        <result column="parameters" property="parameters"
+                javaType="java.util.Map"
+                typeHandler="bysj.pets.bec.handler.CustomMapTypeHandler"/>
+        <result column="warrantyInfo" property="warrantyInfo"/>
+        <!-- 二手商品实拍图映射 -->
+        <result column="secondHandImgUrls" property="secondHandImgUrls"
+                javaType="java.util.List"
+                typeHandler="bysj.pets.bec.handler.CustomJacksonTypeHandler"/>
+    </resultMap>
+
+    <select id="selectGoodsDetail" resultMap="GoodsDetailVOMap">
+        SELECT
+        p.product_id AS id,
+        p.model AS name,
+        b.brand_name AS brandName,
+        p.category_id AS categoryId,
+        p.price,
+        p.original_price AS originalPrice,
+        p.stock,
+        p.min_rental_days AS minRentalDays,
+        si.storage_path AS imageUrl,
+        pd.parameters AS specifications,  <!-- 直接映射到specifications字段 -->
+        pd.img_urls AS imageUrls,          <!-- 直接映射到imageUrls字段 -->
+        pd.description AS description,
+        sh.description AS secondHandDescription,
+        <!-- 二手商品特有字段 -->
+        sh.quality_report AS qualityReport,
+        sh.used_time AS usedTime,
+        sh.defect_desc AS defectDesc,
+        sh.defect_img AS defectImg,
+        sh.seller_type AS sellerType,
+        sh.negotiate_status AS negotiateStatus,
+        sh.final_price AS finalPrice,
+        p.`condition`,
+        p.seller_id AS sellerId,
+        u.nickname AS sellerName,
+        <!-- 新增字段 -->
+        sh.parameters AS parameters,
+        sh.warranty_info AS warrantyInfo,
+        sh.img_urls AS secondHandImgUrls
+        FROM product p
+        LEFT JOIN brand b ON p.brand = b.brand_id
+        LEFT JOIN (
+        SELECT product_id, MAX(image_id) as image_id
+        FROM product_image
+        WHERE image_type = 'main'
+        GROUP BY product_id
+        ) pi ON p.product_id = pi.product_id
+        LEFT JOIN sys_image si ON pi.image_id = si.id
+        LEFT JOIN product_detail pd ON p.product_id = pd.product_id
+        LEFT JOIN second_hand sh ON p.product_id = sh.product_id
+        LEFT JOIN user u ON p.seller_id = u.user_id
+        WHERE p.product_id = #{productId}
+        LIMIT 1
+    </select>
+
+    <!-- 获取相关商品推荐 -->
+    <select id="selectRelatedProducts" resultType="bysj.pets.bec.entity.vo.GoodsVO">
+        SELECT
+            p.product_id AS productId,
+            p.model AS name,
+            b.brand_name AS brandName,
+            p.price,
+            si.storage_path AS imageUrl
+        FROM product p
+        LEFT JOIN brand b ON p.brand = b.brand_id
+        LEFT JOIN product_image pi ON p.product_id = pi.product_id AND pi.image_type = 'main'
+        LEFT JOIN sys_image si ON pi.image_id = si.id
+        WHERE p.product_id != #{productId}  -- 排除当前商品
+          AND p.audit_status = 1  -- 审核通过
+          AND p.is_on_shelf = 1   -- 已上架
+          AND p.product_type = #{productType}   -- 只返回相同类型的商品
+        ORDER BY RAND()  -- 随机推荐
+        LIMIT #{limit}    -- 限制返回数量
+    </select>
+    
+    <!-- 查询商品主图 -->
+    <select id="selectMainImageByProductId" resultType="java.lang.String">
+        SELECT si.storage_path
+        FROM product_image pi
+        LEFT JOIN sys_image si ON pi.image_id = si.id
+        WHERE pi.product_id = #{productId} AND pi.image_type = 'main'
+        LIMIT 1
+    </select>
+    
+    <!-- 查询商品规格 -->
+    <select id="selectSpecificationsByProductId" resultType="java.lang.String">
+        SELECT pd.parameters
+        FROM product_detail pd
+        WHERE pd.product_id = #{productId}
+        LIMIT 1
+    </select>
+    
+    <!-- 查询品牌名称 -->
+    <select id="selectBrandNameByProductId" resultType="java.lang.String">
+        SELECT b.brand_name
+        FROM product p
+        LEFT JOIN brand b ON p.brand = b.brand_id
+        WHERE p.product_id = #{productId}
+        LIMIT 1
+    </select>
+    
+    <!-- 查询租赁商品详情 -->
+    <select id="selectRentalDetailByProductId" resultType="bysj.pets.bec.entity.ProductRentalDetail">
+        SELECT *
+        FROM product_rental_detail
+        WHERE product_id = #{productId}
+    </select>
+    
+    <!-- 库存管理相关SQL -->
+    
+    <!-- 获取库存列表 -->
+    <select id="selectInventoryList" resultType="bysj.pets.bec.entity.vo.InventoryItemVO">
+        SELECT 
+            p.product_id AS id,
+            p.product_id AS productId,
+            CONCAT(b.brand_name, ' ', p.model) AS productName,
+            p.product_type AS productType,
+            0 AS skuId,
+            '颜色' AS skuAttribute,
+            '黑色' AS skuValue,
+            p.stock AS currentStock,
+            p.min_stock AS minStock,
+            0 AS sales,
+            p.create_time AS createTime,
+            p.update_time AS lastUpdateTime,
+            b.brand_name AS brandName,
+            p.price,
+            p.original_price AS originalPrice
+        FROM product p
+        LEFT JOIN brand b ON p.brand = b.brand_id
+        WHERE 1=1
+        
+        <!-- 商品类型筛选 -->
+        <if test="productType != null and productType != ''">
+            <if test="productType == 'new'">
+                AND p.product_type = 1
+            </if>
+            <if test="productType == 'used'">
+                AND p.product_type = 2
+            </if>
+            <if test="productType == 'rental'">
+                AND p.product_type = 3
+            </if>
+        </if>
+        
+        <!-- 库存状态筛选 -->
+        <if test="stockStatus != null and stockStatus != ''">
+            <if test="stockStatus == 'out'">
+                AND p.stock &lt;= 0
+            </if>
+            <if test="stockStatus == 'warning'">
+                AND p.stock &gt; 0 AND p.stock &lt; p.min_stock
+            </if>
+            <if test="stockStatus == 'sufficient'">
+                AND p.stock &gt;= p.min_stock
+            </if>
+        </if>
+        
+        <!-- 关键词搜索 -->
+        <if test="keyword != null and keyword != ''">
+            AND (b.brand_name LIKE CONCAT('%', #{keyword}, '%')
+            OR p.model LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+    
+    <!-- 获取库存总数 -->
+    <select id="selectInventoryTotal" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM product p
+        LEFT JOIN brand b ON p.brand = b.brand_id
+        WHERE 1=1
+        
+        <!-- 商品类型筛选 -->
+        <if test="productType != null and productType != ''">
+            <if test="productType == 'new'">
+                AND p.product_type = 1
+            </if>
+            <if test="productType == 'used'">
+                AND p.product_type = 2
+            </if>
+            <if test="productType == 'rental'">
+                AND p.product_type = 3
+            </if>
+        </if>
+        
+        <!-- 库存状态筛选 -->
+        <if test="stockStatus != null and stockStatus != ''">
+            <if test="stockStatus == 'out'">
+                AND p.stock &lt;= 0
+            </if>
+            <if test="stockStatus == 'warning'">
+                AND p.stock &gt; 0 AND p.stock &lt; p.min_stock
+            </if>
+            <if test="stockStatus == 'sufficient'">
+                AND p.stock &gt;= p.min_stock
+            </if>
+        </if>
+        
+        <!-- 关键词搜索 -->
+        <if test="keyword != null and keyword != ''">
+            AND (b.brand_name LIKE CONCAT('%', #{keyword}, '%')
+            OR p.model LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+    
+    <!-- 获取库存详情 -->
+    <select id="selectInventoryDetail" resultType="bysj.pets.bec.entity.vo.InventoryItemVO">
+        SELECT 
+            p.product_id AS id,
+            p.product_id AS productId,
+            CONCAT(b.brand_name, ' ', p.model) AS productName,
+            p.product_type AS productType,
+            0 AS skuId,
+            '颜色' AS skuAttribute,
+            '黑色' AS skuValue,
+            p.stock AS currentStock,
+            p.min_stock AS minStock,
+            0 AS sales,
+            p.create_time AS createTime,
+            p.update_time AS lastUpdateTime,
+            b.brand_name AS brandName,
+            p.price,
+            p.original_price AS originalPrice
+        FROM product p
+        LEFT JOIN brand b ON p.brand = b.brand_id
+        WHERE p.product_id = #{productId}
+    </select>
+    
+    <!-- 获取库存变更历史 -->
+    <select id="selectInventoryHistory" resultType="bysj.pets.bec.entity.vo.InventoryHistoryVO">
+        SELECT 
+            1 AS id,
+            NOW() AS changeTime,
+            '增加' AS changeType,
+            0 AS beforeStock,
+            p.stock AS afterStock,
+            p.stock AS changeQuantity,
+            '初始化库存' AS reason,
+            '系统' AS operator
+        FROM product p
+        WHERE p.product_id = #{productId}
+    </select>
+    
+    <!-- 获取库存变更历史总数 -->
+    <select id="selectInventoryHistoryTotal" resultType="java.lang.Long">
+        SELECT 1
+        FROM product p
+        WHERE p.product_id = #{productId}
+    </select>
+    
+    <!-- 调整库存 -->
+    <update id="updateProductStock">
+        UPDATE product
+        SET stock = #{newStock},
+            update_time = NOW()
+        WHERE product_id = #{productId}
+    </update>
+    
+    <!-- 设置安全库存 -->
+    <update id="updateMinStock">
+        UPDATE product
+        SET min_stock = #{minStock},
+            update_time = NOW()
+        WHERE product_id = #{productId}
+    </update>
+
+    <!-- 插入租赁商品详情 -->
+    <insert id="insertRentalDetail" parameterType="bysj.pets.bec.entity.ProductRentalDetail">
+        INSERT INTO product_rental_detail (
+            product_id, deposit, min_rental_days, max_rental_days, 
+            insurance_fee, late_fee_rate, damage_fee_rule, 
+            pickup_methods, delivery_fee, created_time, updated_time
+        ) VALUES (
+            #{productId}, #{deposit}, #{minRentalDays}, #{maxRentalDays}, 
+            #{insuranceFee}, #{lateFeeRate}, #{damageFeeRule}, 
+            #{pickupMethods}, #{deliveryFee}, NOW(), NOW()
+        )
+    </insert>
+
+    <!-- 更新租赁商品详情 -->
+    <update id="updateRentalDetail" parameterType="bysj.pets.bec.entity.ProductRentalDetail">
+        UPDATE product_rental_detail
+        SET 
+            deposit = #{deposit},
+            min_rental_days = #{minRentalDays},
+            max_rental_days = #{maxRentalDays},
+            insurance_fee = #{insuranceFee},
+            late_fee_rate = #{lateFeeRate},
+            damage_fee_rule = #{damageFeeRule},
+            pickup_methods = #{pickupMethods},
+            delivery_fee = #{deliveryFee},
+            updated_time = NOW()
+        WHERE product_id = #{productId}
+    </update>
+
+    <!-- 查询带品牌名称的商品列表（用于商品审核） -->
+    <select id="selectProductListWithBrandName" resultType="java.util.Map">
+        SELECT
+            p.product_id AS productId,
+            p.model,
+            p.brand,
+            b.brand_name AS brandName,
+            p.product_type AS productType,
+            p.price,
+            p.stock,
+            p.audit_status AS auditStatus,
+            p.create_time AS createTime
+        FROM product p
+        LEFT JOIN brand b ON p.brand = b.brand_id
+        WHERE p.audit_status = #{auditStatus}  <!-- 根据状态筛选 -->
+        
+        <!-- 商品名称筛选（不区分大小写） -->
+        <if test="productName != null and productName != ''">
+            AND LOWER(p.model) LIKE CONCAT('%', LOWER(#{productName}), '%')
+        </if>
+        
+        <!-- 品牌筛选（不区分大小写） -->
+        <if test="brand != null and brand != ''">
+            AND (LOWER(b.brand_name) LIKE CONCAT('%', LOWER(#{brand}), '%') OR p.brand = #{brand})
+        </if>
+        
+        <!-- 型号筛选（不区分大小写） -->
+        <if test="model != null and model != ''">
+            AND LOWER(p.model) LIKE CONCAT('%', LOWER(#{model}), '%')
+        </if>
+        
+        <!-- 商品类型筛选 -->
+        <if test="productType != null">
+            AND p.product_type = #{productType}
+        </if>
+        
+        ORDER BY p.create_time DESC
+    </select>
+
+</mapper>

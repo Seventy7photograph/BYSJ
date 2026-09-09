@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bysj.pets.bec.mapper.EvaluationMapper">
+
+    <!-- 根据商品ID获取评价列表 -->
+    <select id="getEvaluationsByProductId" resultType="bysj.pets.bec.entity.Evaluation">
+        SELECT e.*, u.nickname as userName 
+        FROM evaluation e 
+        LEFT JOIN user u ON e.user_id = u.user_id 
+        WHERE e.product_id = #{productId} AND e.eval_status = 1 
+        ORDER BY e.create_time DESC
+    </select>
+
+    <!-- 根据订单ID获取评价 -->
+    <select id="getEvaluationByOrderId" resultType="bysj.pets.bec.entity.Evaluation">
+        SELECT * FROM evaluation WHERE order_id = #{orderId}
+    </select>
+
+    <!-- 根据用户ID获取评价列表 -->
+    <select id="getEvaluationsByUserId" resultType="bysj.pets.bec.entity.Evaluation">
+        SELECT e.*, p.model as productName 
+        FROM evaluation e 
+        LEFT JOIN product p ON e.product_id = p.product_id 
+        WHERE e.user_id = #{userId} AND e.eval_status = 1 
+        ORDER BY e.create_time DESC
+    </select>
+
+</mapper>

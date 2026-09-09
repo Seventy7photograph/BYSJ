@@ -1,0 +1,53 @@
+package bysj.pets.bec.test;
+
+import bysj.pets.bec.entity.ProductImage;
+import bysj.pets.bec.entity.SysImage;
+import bysj.pets.bec.mapper.ProductImageMapper;
+import bysj.pets.bec.mapper.SysImageMapper;
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+
+import java.util.List;
+
+@SpringBootApplication
+@MapperScan("bysj.pets.bec.mapper")
+public class ImageTest {
+
+    public static void main(String[] args) {
+        // 启动Spring Boot应用
+        ConfigurableApplicationContext context = SpringApplication.run(ImageTest.class, args);
+        
+        // 获取Mapper实例
+        ProductImageMapper productImageMapper = context.getBean(ProductImageMapper.class);
+        SysImageMapper sysImageMapper = context.getBean(SysImageMapper.class);
+        
+        // 查询商品id为20的图片
+        System.out.println("=== 商品id为20的图片 ===");
+        List<ProductImage> images20 = productImageMapper.selectList(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<ProductImage>()
+                        .eq(ProductImage::getProductId, 20L)
+        );
+        for (ProductImage image : images20) {
+            System.out.println("ProductImage: " + image);
+            SysImage sysImage = sysImageMapper.selectById(image.getImageId());
+            System.out.println("SysImage: " + sysImage);
+        }
+
+        // 查询商品id为1的图片作为对比
+        System.out.println("\n=== 商品id为1的图片 ===");
+        List<ProductImage> images1 = productImageMapper.selectList(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<ProductImage>()
+                        .eq(ProductImage::getProductId, 1L)
+        );
+        for (ProductImage image : images1) {
+            System.out.println("ProductImage: " + image);
+            SysImage sysImage = sysImageMapper.selectById(image.getImageId());
+            System.out.println("SysImage: " + sysImage);
+        }
+        
+        // 关闭应用
+        context.close();
+    }
+}

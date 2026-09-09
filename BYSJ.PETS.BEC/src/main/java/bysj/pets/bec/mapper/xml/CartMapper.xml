@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bysj.pets.bec.mapper.CartMapper">
+
+    <!-- 获取用户购物车列表 -->
+    <select id="selectUserCartItems" resultType="bysj.pets.bec.dto.CartItemDTO">
+        SELECT
+            c.cart_id AS id,
+            c.product_id AS productId,
+            p.model AS productName,
+            pi.storage_path AS productImage,
+            p.price,
+            c.quantity,
+            p.stock,
+            (c.select_status = 1) AS selected,
+            pd.parameters AS specifications,
+            b.brand_name AS brandName
+        FROM cart c
+        LEFT JOIN product p ON c.product_id = p.product_id
+        LEFT JOIN brand b ON p.brand = b.brand_id
+        LEFT JOIN (
+            SELECT product_id, MIN(image_id) AS image_id
+            FROM product_image 
+            WHERE image_type = 'main'
+            GROUP BY product_id
+        ) pri ON p.product_id = pri.product_id
+        LEFT JOIN sys_image pi ON pri.image_id = pi.id
+        LEFT JOIN product_detail pd ON p.product_id = pd.product_id
+        WHERE c.user_id = #{userId}
+        GROUP BY c.cart_id
+        ORDER BY c.create_time DESC
+    </select>
+
+    <!-- 根据用户ID和商品ID查询购物车记录 -->
+    <select id="selectCartItemByUserIdAndProductId" resultType="bysj.pets.bec.entity.Cart">
+        SELECT *
+        FROM cart
+        WHERE user_id = #{userId} AND product_id = #{productId}
+    </select>
+
+    <!-- 批量删除购物车记录 -->
+    <delete id="deleteCartItemsByUserAndProductIds">
+        DELETE FROM cart
+        WHERE user_id = #{userId} AND product_id IN
+        <foreach collection="productIds" item="productId" open="(" separator="," close=")">
+            #{productId}
+        </foreach>
+    </delete>
+
+    <!-- 清空用户购物车 -->
+    <delete id="clearUserCart">
+        DELETE FROM cart
+        WHERE user_id = #{userId}
+    </delete>
+
+</mapper>

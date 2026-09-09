@@ -1,0 +1,30 @@
+# IntelliJ IDEA
+.idea/
+
+# Node.js
+node_modules/
+**/node_modules/
+
+# Java
+target/
+out/
+*.class
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Office temporary files
+~$*
+
+# Build / temporary
+dist/
+*.tmp

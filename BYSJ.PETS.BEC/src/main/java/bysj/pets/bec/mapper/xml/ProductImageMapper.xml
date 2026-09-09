@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bysj.pets.bec.mapper.ProductImageMapper">
+
+    <select id="selectMainImageByProductId" resultType="bysj.pets.bec.entity.ProductImage">
+        SELECT * FROM product_image
+        WHERE product_id = #{productId}
+          AND image_type = 'main'
+          AND (is_deleted = 0 OR is_deleted IS NULL)
+            LIMIT 1
+    </select>
+</mapper>

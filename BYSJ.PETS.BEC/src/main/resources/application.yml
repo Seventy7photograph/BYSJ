@@ -1,0 +1,81 @@
+server:
+  port: 9090
+spring:
+  # 数据库配置
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/db_bysj_pets?useSSL=false&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  main:
+    allow-bean-definition-overriding: true
+  # 文件上传限制
+  servlet:
+    multipart:
+      max-file-size: 10MB  # 单文件最大大小
+      max-request-size: 50MB  # 单次请求最大大小
+  # Redis配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+      timeout: 10000
+
+
+# 自定义配置：本地存储路径和访问前缀
+file:
+  upload:
+    path: G:/study/AAA-BYSJ/BYSJ.PETS.FEC/public/images  # 图片存储的本地绝对路径
+  access:
+    prefix: http://localhost:5173/images/  # 前端访问图片的URL前缀
+
+jwt:
+  secret: defaultSecretKeyForDev12345678901234567890
+  expire: 86400000
+
+mybatis-plus:
+  mapper-locations: classpath*:bysj/pets/bec/mapper/xml/*.xml  # 若有自定义 XML 可保留，否则可省略
+  type-aliases-package: bysj.pets.bec.entity # 实体类别名包
+  global-config:
+    db-config:
+      table-prefix: # 表前缀（若表名无统一前缀可省略）
+      id-type: AUTO # 全局默认主键类型（自增）
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印 SQL 日志（开发环境调试用）
+    map-underscore-to-camel-case: true # 自动驼峰命名转换（如 user_id → userId）
+
+
+
+logging:
+  level:
+    bysj.pets.bec.mapper: debug
+
+sa-token:
+  # token名称 (同时也是cookie名称)
+  token-name: token
+  # token有效期，单位s 默认30天, -1代表永不过期
+  timeout: 2592000
+  # token临时有效期 (指定时间内无操作就视为token过期) 单位: 秒
+  active-timeout: -1
+  # 是否允许同一账号并发登录 (为true时允许一起登录, 为false时新登录挤掉旧登录)
+  is-concurrent: true
+  # 在多人登录同一账号时，是否共用一个token (为true时所有登录共用一个token, 为false时每次登录新建一个token)
+  is-share: false
+  #  # token风格
+  #  token-style: tik
+  # 是否输出操作日志
+  is-log: false
+  # jwt秘钥
+  jwt-secret-key: p@ssW0rdawbkasja#asd
+
+# Springdoc配置：适配Spring 6.1+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+  # 解决Spring 6.1 ControllerAdviceBean兼容性问题
+  default-produces-media-type: application/json
