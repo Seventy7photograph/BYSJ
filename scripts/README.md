@@ -1,7 +1,7 @@
 # 验收脚本
 
-三个脚本覆盖「接口权限 → 业务闭环 → 页面渲染」三层。它们用项目自己的 JWT 密钥
-现场签发四种角色的令牌，不需要知道任何账号密码。
+三个验收脚本覆盖「接口权限 → 业务闭环 → 页面渲染」三层，另有三项性能工具。
+它们都用项目自己的 JWT 密钥现场签发令牌，不需要知道任何账号密码。
 
 ## 前提
 
@@ -17,6 +17,24 @@ node scripts/verify-permissions.cjs  # 只跑权限矩阵
 node scripts/verify-business-flow.cjs
 BASE_URL=http://127.0.0.1:5173 node scripts/verify-pages.cjs
 ```
+
+## 性能工具（`scripts/perf/`）
+
+`mysqldump` 出开发库、改名导入 `db_bysj_perf`，再执行生成脚本：
+
+```bash
+node scripts/perf/analyze-queries.cjs db_bysj_perf BEFORE   # 热点查询计时
+mysql -u root -p db_bysj_perf < 数据库文件/迁移记录/2026-10-15_查询索引优化.sql
+node scripts/perf/analyze-queries.cjs db_bysj_perf AFTER
+node scripts/perf/load-test.cjs http://127.0.0.1:9091 20 20
+```
+
+- `seed-perf-data.sql` 把各表放大到万级（2 万商品、3 万订单、10 万消息）。
+  开发库只有 37 件商品，在这个体量上所有查询都是全表扫描，分析不出任何结论。
+- `analyze-queries.cjs` 对热点查询跑 `EXPLAIN ANALYZE`，每条取 5 次中位数；
+  单次读数很容易被冷缓存干扰（实测出现过一次 52 ms 的假回退）。
+- `load-test.cjs` 用内置 `fetch` 做并发压测，混合比例贴近真实浏览行为。
+  建议让被测实例指向放大库、并关掉 SQL 日志打印，否则测的是日志性能。
 
 ## 各脚本在验证什么
 

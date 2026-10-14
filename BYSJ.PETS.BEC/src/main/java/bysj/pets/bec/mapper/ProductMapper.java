@@ -28,7 +28,10 @@ public interface ProductMapper extends BaseMapper<Product> {
             @Param("quality") String quality,
             @Param("condition") String condition,
             @Param("productType") Integer productType,
-            @Param("priceRange") String priceRange
+            @Param("priceRange") String priceRange,
+            // 分页下推到 SQL：偏移量与条数
+            @Param("offset") Integer offset,
+            @Param("limit") Integer limit
     );
 
     /**

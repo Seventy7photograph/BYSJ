@@ -1,6 +1,6 @@
 {
   "name": "bysj-pets-fec",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "摄影器材交易系统 — 前端（Vue 3 + TypeScript + Vite + Element Plus）",
   "private": true,
   "type": "module",

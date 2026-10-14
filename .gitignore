@@ -37,6 +37,9 @@ dist/
 # 验收脚本产出的截图
 scripts/shots/
 
+# 验收/性能脚本的运行产物
+scripts/perm-matrix.json
+
 # 上传目录：细则见 BYSJ.PETS.BEC/.gitignore
 # 只忽略运行时新产生的上传（按 yyyy/MM 落盘），种子素材要随仓库走。
 BYSJ.PETS.BEC/data/uploads/20*/

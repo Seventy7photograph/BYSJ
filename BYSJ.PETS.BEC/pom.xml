@@ -13,7 +13,7 @@
     <!-- 项目基本信息 -->
     <groupId>bysj.pets.bec</groupId>
     <artifactId>BYSJ-PETS-BEC</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <name>BYSJ.PETS.BEC</name>
     <description>摄影器材交易系统 — 后端服务（Spring Boot 3.5 + MyBatis-Plus + MySQL + Redis）</description>
     <url/>

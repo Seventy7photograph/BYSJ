@@ -125,29 +125,18 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         );
         page.setTotal(total);
         
-        // 5. 计算分页范围
-        int start = (pageNum - 1) * pageSize;
-        int end = start + pageSize;
-        
-        // 6. 执行查询并进行手动分页
-        List<GoodsVO> allGoodsList = productMapper.selectGoodsList(
-                categoryCodes, brand, type, keyword, sort, quality, conditionStr, productType, priceRange
+        // 5. 分页交给数据库完成（LIMIT offset, size）。
+        //    原实现把全部匹配行查出来再在 Java 里切片，商品量一大就会拖垮列表页。
+        int offset = Math.max(0, (pageNum - 1) * pageSize);
+        List<GoodsVO> pageRecords = productMapper.selectGoodsList(
+                categoryCodes, brand, type, keyword, sort, quality, conditionStr, productType, priceRange,
+                offset, pageSize
         );
-        
-        // 7. 截取分页数据
-        List<GoodsVO> pagedGoodsList = new ArrayList<>();
-        for (int i = start; i < end && i < allGoodsList.size(); i++) {
-            pagedGoodsList.add(allGoodsList.get(i));
-        }
-        
-        page.setRecords(pagedGoodsList);
+        page.setRecords(pageRecords);
 
-        // 8. 处理图片和库存提示（保持不变）
-        for (GoodsVO goods : pagedGoodsList) {
-            goods.setImageUrl(getProductImageUrl(goods.getProductId()));
-            goods.setStockTip("库存充足");
-        }
-
+        // 6. 图片地址已在 selectGoodsList 里一并查出（主图 JOIN），
+        //    不再逐行回查一次；库存提示由前端依据真实的 stock / minStock 计算，
+        //    原先这里写死 "库存充足"，会让售罄商品也显示库存充足。
         return page;
     }
 

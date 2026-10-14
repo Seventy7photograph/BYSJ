@@ -4,6 +4,41 @@
 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循[语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [3.0.1] - 2026-10-15
+
+性能分析与压测专项。详细数据、方法与工具见 [docs/performance.md](docs/performance.md)。
+
+### 修复
+
+- **列表分页是"全部取出再在 Java 里切片"**：2 万件商品时每次列表请求都要传输并
+  构造全部匹配行，单请求 803 ms，且耗时与页码无关。改为把 `LIMIT` 下推到 SQL。
+- **计数查询做了两个用不上的 `LEFT JOIN`**：`LEFT JOIN` 不减少行数、其列也不参与
+  `COUNT`，数据库却要为每一行多做两次关联查找，`COUNT` 从 4 ms 恶化到 85 ms。
+  改为只在对应筛选条件生效时才 JOIN。
+- **排序兜底列方向不一致导致索引失效**：`price ASC, product_id DESC` 是混合方向，
+  ASC 索引的正负向扫描都满足不了，退化成全表扫描加 `filesort`（57 ms 对 0.8 ms）。
+- 列表接口把 `stockTip` 写死成"库存充足"，售罄商品也会显示库存充足；改由前端
+  依据真实的 `stock` / `minStock` 计算。
+- 列表接口逐行再查一次主图（N+1），而 SQL 已经带回了 `imageUrl`，已去掉。
+
+### 新增
+
+- 6 个查询索引，覆盖商城列表、交易线筛选、价格排序与订单列表；
+  迁移脚本做了幂等处理，可重复执行。
+- `scripts/perf/`：放大数据集生成、热点查询计时、并发压测三个可复现工具。
+- `docs/performance.md`：分析报告。
+
+### 变更
+
+- 迁移脚本在最后固定执行 `ANALYZE TABLE`。缺少这一步时优化器会估错代价，
+  「商品总数」实测从 7.2 ms 退化到 52 ms。
+
+### 效果
+
+在 2 万商品 / 3 万订单 / 10 万消息的数据集上：商城列表 74.8 → 11.2 ms，
+按交易线筛选 51.5 → 7.7 ms，价格升序 70.5 → 9.4 ms；并发 20 的吞吐从
+16 req/s 提升到 236 req/s。
+
 ## [3.0.0] - 2026-10-15
 
 首个重构完成版。相比 2.x，前后端与数据库都做了结构调整，
@@ -61,3 +96,4 @@
 见 [README.md 的「已知限制」](README.md)。支付为模拟实现，按需求保留。
 
 [3.0.0]: https://github.com/Seventy7photograph/BYSJ/releases/tag/v3.0.0
+[3.0.1]: https://github.com/Seventy7photograph/BYSJ/releases/tag/v3.0.1
