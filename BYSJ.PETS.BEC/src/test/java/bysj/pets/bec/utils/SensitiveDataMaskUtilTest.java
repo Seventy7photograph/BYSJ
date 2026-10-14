@@ -67,7 +67,8 @@ class SensitiveDataMaskUtilTest {
     void testMaskAddress() {
         String address = "北京市海淀区中关村大街123号";
         String maskedAddress = sensitiveDataMaskUtil.mask(address, SensitiveDataMaskUtil.MaskType.ADDRESS);
-        assertEquals("北京市海淀区中关****", maskedAddress);
+        // 只保留省市区前缀，详细地址一律遮蔽
+        assertEquals("北京市海淀区****", maskedAddress);
     }
 
     @Test

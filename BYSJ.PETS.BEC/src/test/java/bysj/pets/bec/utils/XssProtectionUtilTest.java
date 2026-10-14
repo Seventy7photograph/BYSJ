@@ -87,20 +87,27 @@ class XssProtectionUtilTest {
 
     @Test
     void testEscapeHtml() {
-        // 测试HTML转义
+        // 测试 HTML 转义。
+        // 单引号也要转义成 &#39;：属性值常用单引号包裹，漏掉它等于留下一个
+        // 属性逃逸的口子，OWASP 的转义建议里 & < > " ' 五个都要覆盖。
         String input = "<script>alert('XSS')</script>";
         String escapedInput = xssProtectionUtil.escapeHtml(input);
-        assertEquals("&lt;script&gt;alert('XSS')&lt;/script&gt;", escapedInput);
+        assertEquals("&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;", escapedInput);
     }
 
     @Test
     void testSanitizeInput() {
-        // 测试清理和验证输入
+        // 测试清理和验证输入：script 标签连同内容会被整体剔除，
+        // 结果里不该再出现任何尖括号或 script 字样。
         String input = "<script>alert('XSS')</script>";
         String sanitizedInput = xssProtectionUtil.sanitizeInput(input, 100);
         assertFalse(sanitizedInput.contains("<script>"));
         assertFalse(sanitizedInput.contains("</script>"));
-        assertTrue(sanitizedInput.contains("alert('XSS')")); // 转义后应该保留内容
+        assertFalse(sanitizedInput.contains("<"));
+        assertFalse(sanitizedInput.toLowerCase().contains("script"));
+
+        // 非标签内容会被转义后保留下来（单引号同样转义）
+        assertEquals("alert(&#39;XSS&#39;)", xssProtectionUtil.sanitizeInput("alert('XSS')", 100));
     }
 
     @Test

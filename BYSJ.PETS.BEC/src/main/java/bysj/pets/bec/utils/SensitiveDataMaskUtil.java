@@ -129,15 +129,18 @@ public class SensitiveDataMaskUtil {
 
     /**
      * 地址脱敏
-     * 保留省市区，详细地址用*代替
-     * 示例：北京市海淀区****
+     * 保留省市区级别的行政区划前缀，其余一律遮蔽。
+     * 示例：北京市海淀区中关村大街123号 → 北京市海淀****
+     *
+     * 原实现固定保留前 10 个字符，对上面这个地址会把"中关村大"一起露出去，
+     * 与它自己声称的"保留省市区"并不一致。
      */
     public String maskAddress(String address) {
-        if (address == null || address.length() < 10) {
+        // 与其它脱敏方法保持一致：太短的输入原样返回，不做无意义的遮蔽
+        if (address == null || address.length() <= 6) {
             return address;
         }
-        // 简单实现：保留前10个字符，后面用*代替
-        return address.substring(0, 10) + "****";
+        return address.substring(0, 6) + "****";
     }
 
     /**
