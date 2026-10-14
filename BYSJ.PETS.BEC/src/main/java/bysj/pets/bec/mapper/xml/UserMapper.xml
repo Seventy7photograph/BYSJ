@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bysj.pets.bec.mapper.UserMapper">
+
+    <!-- 根据用户名查询用户ID -->
+    <select id="selectUserIdByUsername" resultType="java.lang.Long">
+        SELECT user_id FROM user WHERE username = #{username}
+    </select>
+    
+    <!-- 根据用户名查询用户信息 -->
+    <select id="selectUserByUsername" resultType="bysj.pets.bec.entity.User">
+        SELECT * FROM user WHERE username = #{username}
+    </select>
+    
+    <!-- 根据用户ID查询用户名 -->
+    <select id="selectUsernameById" resultType="java.lang.String">
+        SELECT username FROM user WHERE user_id = #{userId}
+    </select>
+
+</mapper>

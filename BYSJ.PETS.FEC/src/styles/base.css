@@ -1,0 +1,405 @@
+/* ---------------------------------------------------------------------------
+   Base layer: reset, browser surfaces, shared primitives.
+   Every value comes from tokens.css.
+   --------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--paper-1);
+  color: var(--ink-1);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  color: var(--ink-0);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--text-2xl);
+}
+h2 {
+  font-size: var(--text-xl);
+}
+h3 {
+  font-size: var(--text-lg);
+}
+h4 {
+  font-size: var(--text-md);
+}
+
+p {
+  margin: 0;
+  max-width: 72ch;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* --- browser surfaces belong to the world too ---------------------------- */
+
+::selection {
+  background: var(--ink-0);
+  color: var(--paper-0);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-2) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--line-2);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: var(--radius-pill);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-4);
+  background-clip: content-box;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  letter-spacing: -0.01em;
+}
+
+/* --- shell --------------------------------------------------------------- */
+
+.shell {
+  width: 100%;
+  max-width: var(--shell-max);
+  margin-inline: auto;
+  padding-inline: var(--shell-gutter);
+}
+
+.shell--narrow {
+  max-width: 880px;
+}
+
+/* --- page header --------------------------------------------------------- */
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.page-head__title {
+  font-size: var(--text-lg);
+  letter-spacing: -0.02em;
+}
+
+.page-head__note {
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  margin-top: var(--space-1);
+}
+
+/* --- surface: a plate declares a hairline edge OR a shadow, never both ---- */
+
+.plate {
+  background: var(--paper-0);
+  border: var(--edge);
+  border-radius: var(--radius-md);
+}
+
+.plate--flush {
+  border: none;
+  border-top: var(--hairline);
+  border-radius: 0;
+}
+
+.plate__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--hairline);
+}
+
+.plate__title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--ink-0);
+}
+
+.plate__body {
+  padding: var(--pad-surface);
+}
+
+/* --- spec table: the signature component -------------------------------- */
+
+.spec {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+}
+
+.spec__row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-2) 0;
+  border-bottom: var(--hairline);
+}
+
+.spec__row:last-child {
+  border-bottom: none;
+}
+
+.spec__key {
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+}
+
+.spec__val {
+  color: var(--ink-1);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- money ---------------------------------------------------------------- */
+
+.money {
+  font-variant-numeric: tabular-nums;
+  color: var(--signal-amber);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.money__sign {
+  font-size: 0.72em;
+  margin-right: 1px;
+}
+
+.money--chrome {
+  color: var(--ink-3);
+  font-weight: 400;
+  text-decoration: line-through;
+  font-size: var(--text-xs);
+}
+
+/* --- pills ---------------------------------------------------------------- */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 22px;
+  padding-inline: 8px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.pill--neutral {
+  background: var(--paper-2);
+  color: var(--ink-2);
+}
+.pill--teal {
+  background: var(--signal-teal-wash);
+  color: var(--signal-teal-deep);
+}
+.pill--amber {
+  background: var(--signal-amber-wash);
+  color: var(--signal-amber-deep);
+}
+.pill--vermilion {
+  background: var(--signal-vermilion-wash);
+  color: var(--signal-vermilion-deep);
+}
+.pill--outline {
+  background: transparent;
+  border-color: var(--line-2);
+  color: var(--ink-3);
+}
+
+/* --- empty & loading ------------------------------------------------------ */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-16) var(--space-6);
+  text-align: center;
+  color: var(--ink-3);
+}
+
+.empty__title {
+  color: var(--ink-1);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.empty__note {
+  font-size: var(--text-sm);
+  max-width: 42ch;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--paper-2) 0%, var(--paper-3) 50%, var(--paper-2) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.4s linear infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton-sweep {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+/* --- the one authored entrance ------------------------------------------- */
+
+.enter {
+  animation: enter var(--dur-enter) var(--ease-out) both;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- utilities ------------------------------------------------------------ */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-surface);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.muted {
+  color: var(--ink-3);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --dense: 1;
+    --shell-gutter: 16px;
+  }
+  [data-density='merchant'],
+  [data-density='admin'] {
+    --shell-gutter: 12px;
+  }
+}

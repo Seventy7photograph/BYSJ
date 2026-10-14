@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="暂无商品图片">
+  <rect width="400" height="300" fill="#EDEFF1"/>
+  <g fill="none" stroke="#CFD4D9" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" transform="translate(200 150)">
+    <path d="M-34 -22 h20 l8 -10 h12 l8 10 h20 a6 6 0 0 1 6 6 v32 a6 6 0 0 1 -6 6 h-68 a6 6 0 0 1 -6 -6 v-32 a6 6 0 0 1 6 -6 z"/>
+    <circle cx="0" cy="2" r="15"/>
+    <circle cx="0" cy="2" r="8"/>
+    <circle cx="26" cy="-14" r="2.5" fill="#CFD4D9"/>
+  </g>
+  <g stroke="#CFD4D9" stroke-width="2" stroke-linecap="round">
+    <line x1="120" y1="212" x2="180" y2="212"/>
+    <line x1="190" y1="212" x2="280" y2="212"/>
+  </g>
+  <text x="200" y="238" text-anchor="middle" font-family="Inter, 'Microsoft YaHei UI', sans-serif" font-size="13" font-weight="500" fill="#A4ACB2">暂无图片</text>
+</svg>

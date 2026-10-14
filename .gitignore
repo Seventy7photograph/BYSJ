@@ -1,0 +1,47 @@
+# IntelliJ IDEA
+.idea/
+
+# Node.js
+node_modules/
+**/node_modules/
+
+# Java
+target/
+out/
+*.class
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.*
+!.env.example
+# 前端这一份只声明接口前缀，不含任何密钥，属于随代码走的构建配置
+!BYSJ.PETS.FEC/.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Office temporary files
+~$*
+
+# Build / temporary
+dist/
+*.tmp
+
+# 本地验收用的临时目录（截图、日志、一次性脚本），不属于项目源码
+.tmp-preview/
+
+# 验收脚本产出的截图
+scripts/shots/
+
+# 上传目录：细则见 BYSJ.PETS.BEC/.gitignore
+# 只忽略运行时新产生的上传（按 yyyy/MM 落盘），种子素材要随仓库走。
+BYSJ.PETS.BEC/data/uploads/20*/
+BYSJ.PETS.BEC/data/uploads/library/_unused/
+BYSJ.PETS.BEC/data/uploads/library/_unused_icon/
+# library/ 是不被任何代码或数据引用的产品图素材库（约 190MB），
+# 不属于运行所需内容。想随仓库一起发布就删掉下面这一行。
+BYSJ.PETS.BEC/data/uploads/library/

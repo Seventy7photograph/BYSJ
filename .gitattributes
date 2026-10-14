@@ -1,0 +1,31 @@
+# 行尾统一由 Git 管理：仓库内存 LF，检出到工作区按平台转换。
+# 不写这一节的话，Windows 上的编辑器会引入 CRLF，产生大量"整文件重写"式的假 diff。
+* text=auto eol=lf
+
+# Windows 批处理必须是 CRLF，否则 cmd 解析会出问题
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# 二进制：不做行尾转换，也不参与 diff 文本统计
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff  binary
+*.woff2 binary
+*.ttf  binary
+*.xlsx binary
+*.docx binary
+*.jar  binary
+
+# SQL 与 Markdown 用 LF，方便跨平台阅读与比对
+*.sql text eol=lf
+*.md  text eol=lf
+
+# 语言统计：把生成物和第三方目录排除在外
+node_modules/** linguist-vendored
+package-lock.json linguist-generated
+启动脚本 linguist-detectable=true

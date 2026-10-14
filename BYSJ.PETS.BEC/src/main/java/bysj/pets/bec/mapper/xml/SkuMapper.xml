@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bysj.pets.bec.mapper.SkuMapper">
+    <!-- 根据商品ID获取SKU列表 -->
+    <select id="selectSkuListByProductId" resultType="java.util.Map">
+        SELECT
+            sku_id as skuId,
+            product_id as productId,
+            sku_attribute as skuAttribute,
+            sku_value as skuValue,
+            price,
+            stock,
+            min_stock as minStock,
+            sales,
+            create_time as createTime,
+            update_time as updateTime
+        FROM
+            sku
+        WHERE
+            product_id = #{productId}
+        ORDER BY
+            sku_id
+    </select>
+
+    <!-- 根据SKU ID获取SKU信息 -->
+    <select id="selectSkuById" resultType="java.util.Map">
+        SELECT
+            sku_id as skuId,
+            product_id as productId,
+            sku_attribute as skuAttribute,
+            sku_value as skuValue,
+            price,
+            stock,
+            min_stock as minStock,
+            sales,
+            create_time as createTime,
+            update_time as updateTime
+        FROM
+            sku
+        WHERE
+            sku_id = #{skuId}
+    </select>
+
+    <!-- 插入SKU -->
+    <insert id="insertSku" parameterType="bysj.pets.bec.entity.Sku" useGeneratedKeys="true" keyProperty="skuId">
+        INSERT INTO sku (
+            product_id,
+            sku_attribute,
+            sku_value,
+            price,
+            stock,
+            min_stock,
+            sales,
+            create_time,
+            update_time
+        ) VALUES (
+            #{productId},
+            #{skuAttribute},
+            #{skuValue},
+            #{price},
+            #{stock},
+            #{minStock},
+            #{sales},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- 更新SKU -->
+    <update id="updateSku" parameterType="bysj.pets.bec.entity.Sku">
+        UPDATE sku
+        SET
+            sku_attribute = #{skuAttribute},
+            sku_value = #{skuValue},
+            price = #{price},
+            stock = #{stock},
+            min_stock = #{minStock},
+            update_time = NOW()
+        WHERE
+            sku_id = #{skuId}
+    </update>
+
+    <!-- 删除SKU -->
+    <delete id="deleteSku" parameterType="java.lang.Long">
+        DELETE FROM sku
+        WHERE
+            sku_id = #{skuId}
+    </delete>
+</mapper>
